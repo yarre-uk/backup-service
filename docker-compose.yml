@@ -1,0 +1,26 @@
+services:
+  backup-receiver:
+    build:
+      context: ./receiver
+      dockerfile: ./Dockerfile
+    container_name: backup-receiver
+    restart: unless-stopped
+    command: --config /config.yml --host 0.0.0.0 --port 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./receiver/config.yml:/config.yml:ro
+      - ./archive:/archive
+    user: "1000:1000"
+
+  backup-sender-minecraft:
+    build:
+      context: ./sender
+      dockerfile: ./Dockerfile
+    container_name: backup-sender-minecraft
+    command: --config /config.yml
+    volumes:
+      - ./sender/minecraft-config.yml:/config.yml:ro
+      - ./minecraft:/watch
+    network_mode: host
+    user: "1000:1000"
