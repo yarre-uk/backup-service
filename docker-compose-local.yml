@@ -2,7 +2,7 @@ services:
   backup-receiver:
     build:
       context: ./receiver
-      dockerfile: ./Dockerfile
+      dockerfile: ./receiver.Dockerfile
     container_name: backup-receiver
     command: --config /config.yml --host 0.0.0.0 --port 8080
     ports:
