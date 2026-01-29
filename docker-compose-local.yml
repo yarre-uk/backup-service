@@ -20,7 +20,7 @@ services:
     container_name: backup-sender-minecraft
     volumes:
       - ./sender/minecraft-config.yml:/config.yml:ro
-      - ./minecraft:/watch
+      - ./test:/watch
     network_mode: host
     user: "1000:1000"
     restart: unless-stopped

@@ -8,28 +8,6 @@ import requests
 from pathlib import Path
 from datetime import datetime
 
-class ProgressFileWrapper:
-    def __init__(self, file_obj, total_size, game_name):
-        self.file = file_obj
-        self.total_size = total_size
-        self.uploaded = 0
-        self.last_print = 0
-        self.game_name = game_name
-
-    def read(self, size=-1):
-        data = self.file.read(size)
-        self.uploaded += len(data)
-    
-        # Print progress every 10%
-        progress = (self.uploaded / self.total_size) * 100
-        if progress - self.last_print >= 10:
-            print(f"[{self.game_name}] Progress: {progress:.0f}%")
-            self.last_print = progress
-        return data
-    
-    def __len__(self):
-        return self.total_size
-
 
 class BackupTracker:
     def __init__(self, tracker_file):
@@ -165,8 +143,7 @@ class BackupSender:
                 total_size = os.path.getsize(filepath)
 
 
-                wrapped_file = ProgressFileWrapper(f, total_size, self.game_name)
-                files = {'file': (filename, wrapped_file, 'application/octet-stream')}
+                files = {'file': (filename, f, 'application/octet-stream')}
                 data = {'game_name': self.game_name}
 
                 response = requests.post(
