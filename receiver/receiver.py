@@ -132,8 +132,6 @@ async def receive_backup(
     game_name: str = Form(...),
     file: UploadFile = File(...)
 ):
-    print(f"asd")
-
     try:
         file_path = manager.save_backup(game_name, file)
         
