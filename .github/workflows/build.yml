@@ -39,6 +39,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./${{ matrix.service }}
-          file: ./${{ matrix.service }}/Dockerfile
+          file: ./${{ matrix.service }}/${{ matrix.service }}.Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
