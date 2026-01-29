@@ -2,7 +2,7 @@ game_name: "minecraft"
 
 watch_directory: "/watch"
 
-receiver_url: "http://10.66.66.2:8080/backup"
+receiver_url: "http://<your_ip>:8080/backup"
 
 backup_extensions:
   - ".tar.gz"
