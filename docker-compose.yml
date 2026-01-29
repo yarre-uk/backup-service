@@ -1,6 +1,6 @@
 services:
   backup-receiver:
-    image: yarreuk/backup-sender:latest
+    image: yarreuk/backup-receiver:latest
     container_name: backup-receiver
     restart: unless-stopped
     command: --config /config.yml --host 0.0.0.0 --port 8080
@@ -12,7 +12,7 @@ services:
     user: "1000:1000"
 
   backup-sender-minecraft:
-    image: yarreuk/backup-receiver:latest
+    image: yarreuk/backup-sender:latest
     container_name: backup-sender-minecraft
     command: --config /config.yml
     volumes:
