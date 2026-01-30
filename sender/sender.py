@@ -57,7 +57,9 @@ class BackupSender:
         self.receiver_url = config['receiver_url']
         self.backup_extensions = config.get('backup_extensions', ['.tar.gz', '.zip', '.tar'])
         
-        tracker_file = os.path.join(self.watch_dir, '.backup_tracker.csv')
+        data_dir = '/data'
+        os.makedirs(data_dir, exist_ok=True)
+        tracker_file = os.path.join(data_dir, f'{self.game_name}_tracker.csv')
         self.tracker = BackupTracker(tracker_file)
         
         print(f"[{self.game_name}] Initialized backup sender")

@@ -11,12 +11,12 @@ services:
       - ./archive:/archive
     user: "1000:1000"
 
-  backup-sender-minecraft:
+  backup-sender:
     image: yarreuk/backup-sender:latest
     container_name: backup-sender-minecraft
     command: --config /config.yml
     volumes:
-      - ./sender/minecraft-config.yml:/config.yml:ro
+      - ./sender/config.yml:/config.yml:ro
       - ./test:/watch
     network_mode: host
     user: "1000:1000"

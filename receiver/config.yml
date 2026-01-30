@@ -1,8 +1,8 @@
 games:
-  minecraft:
-    archive_path: "/archive/minecraft"
+  game1:
+    archive_path: "/archive/game1"
     max_size_gb: 30
     
-  vintage-story:
-    archive_path: "/archive/vintage-story"
+  game2:
+    archive_path: "/archive/game2"
     max_size_gb: 30

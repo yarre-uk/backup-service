@@ -13,13 +13,13 @@ services:
     user: "1000:1000"
     restart: unless-stopped
 
-  backup-sender-minecraft:
+  backup-sender:
     build:
       context: ./sender
       dockerfile: ./sender.Dockerfile
     container_name: backup-sender-minecraft
     volumes:
-      - ./sender/minecraft-config.yml:/config.yml:ro
+      - ./sender/config.yml:/config.yml:ro
       - ./test:/watch
     network_mode: host
     user: "1000:1000"
