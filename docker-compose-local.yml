@@ -22,5 +22,4 @@ services:
       - ./sender/config.yml:/config.yml:ro
       - ./test:/watch
     network_mode: host
-    user: "1000:1000"
-    restart: unless-stopped
+    # restart: unless-stopped

@@ -1,7 +1,5 @@
 game_name: "game_name"
 
-watch_directory: "/watch"
-
 receiver_url: "http://<your_ip>:8080/backup"
 
 backup_extensions:

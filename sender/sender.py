@@ -8,6 +8,8 @@ import requests
 from pathlib import Path
 from datetime import datetime
 
+data_dir = '/data'
+watch_dir = '/watch'
 
 class BackupTracker:
     def __init__(self, tracker_file):
@@ -53,17 +55,13 @@ class BackupSender:
     def __init__(self, config):
         self.config = config
         self.game_name = config['game_name']
-        self.watch_dir = config['watch_directory']
         self.receiver_url = config['receiver_url']
         self.backup_extensions = config.get('backup_extensions', ['.tar.gz', '.zip', '.tar'])
         
-        data_dir = '/data'
-        os.makedirs(data_dir, exist_ok=True)
         tracker_file = os.path.join(data_dir, f'{self.game_name}_tracker.csv')
         self.tracker = BackupTracker(tracker_file)
         
         print(f"[{self.game_name}] Initialized backup sender")
-        print(f"[{self.game_name}] Watching: {self.watch_dir}")
         print(f"[{self.game_name}] Receiver: {self.receiver_url}")
     
     def _is_backup_file(self, filepath):
@@ -74,8 +72,8 @@ class BackupSender:
         
         # Get current files in directory
         current_files = set()
-        for file in os.listdir(self.watch_dir):
-            filepath = os.path.join(self.watch_dir, file)
+        for file in os.listdir(watch_dir):
+            filepath = os.path.join(watch_dir, file)
             if os.path.isfile(filepath) and self._is_backup_file(filepath):
                 current_files.add(file)
         
@@ -128,7 +126,7 @@ class BackupSender:
                 return False
 
     def send_backup(self, filename):
-        filepath = os.path.join(self.watch_dir, filename)
+        filepath = os.path.join(watch_dir, filename)
 
         # Check if file is still being written
         if not self._wait_for_file_stable(filepath):
@@ -143,7 +141,6 @@ class BackupSender:
             with open(filepath, 'rb') as f:
                 # Wrap file object to track progress
                 total_size = os.path.getsize(filepath)
-
 
                 files = {'file': (filename, f, 'application/octet-stream')}
                 data = {'game_name': self.game_name}
@@ -209,14 +206,11 @@ def main():
     config = load_config(args.config)
     
     # Validate config
-    required_fields = ['game_name', 'watch_directory', 'receiver_url']
+    required_fields = ['game_name', 'receiver_url']
     for field in required_fields:
         if field not in config:
             print(f"Error: Missing required field '{field}' in config")
             sys.exit(1)
-    
-    # Create watch directory if it doesn't exist
-    os.makedirs(config['watch_directory'], exist_ok=True)
     
     # Run sender
     sender = BackupSender(config)
