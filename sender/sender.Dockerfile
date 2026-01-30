@@ -12,6 +12,8 @@ RUN chmod +x entrypoint.sh
 RUN mkdir /data && chown 1000:1000 /data
 RUN mkdir /watch && chown 1000:1000 /watch
 
+VOLUME [ "/data" ]
+
 ENV PYTHONUNBUFFERED=1
 
 USER 1000:1000

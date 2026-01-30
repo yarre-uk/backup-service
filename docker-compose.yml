@@ -17,6 +17,6 @@ services:
     command: --config /config.yml
     volumes:
       - ./sender/config.yml:/config.yml:ro
-      - ./test:/watch
+      - ./test:/watch:ro
     network_mode: host
-    user: "1000:1000"
+    restart: unless-stopped

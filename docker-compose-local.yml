@@ -20,6 +20,6 @@ services:
     container_name: backup-sender-minecraft
     volumes:
       - ./sender/config.yml:/config.yml:ro
-      - ./test:/watch
+      - ./test:/watch:ro
     network_mode: host
-    # restart: unless-stopped
+    restart: unless-stopped
