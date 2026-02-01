@@ -6,8 +6,6 @@ COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY sender.py .
-COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
 
 RUN mkdir /data && chown 1000:1000 /data
 RUN mkdir /watch && chown 1000:1000 /watch
@@ -18,4 +16,4 @@ ENV PYTHONUNBUFFERED=1
 
 USER 1000:1000
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["python", "sender.py", "--config", "/config.yml"]

@@ -5,8 +5,9 @@ import yaml
 import csv
 import argparse
 import requests
-from pathlib import Path
 from datetime import datetime
+import schedule
+import time as time_module
 
 data_dir = '/data'
 watch_dir = '/watch'
@@ -215,6 +216,15 @@ def main():
     # Run sender
     sender = BackupSender(config)
     sender.run()
+
+    schedule.every(1).minutes.do(sender.run)
+    
+    print(f"[{config['game_name']}] Scheduler started, running every 15 minutes")
+    
+    # Keep running
+    while True:
+        schedule.run_pending()
+        time_module.sleep(1)
 
 
 if __name__ == '__main__':
