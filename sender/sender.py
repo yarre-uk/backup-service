@@ -217,7 +217,7 @@ def main():
     sender = BackupSender(config)
     sender.run()
 
-    schedule.every(1).minutes.do(sender.run)
+    schedule.every(15).minutes.do(sender.run)
     
     print(f"[{config['game_name']}] Scheduler started, running every 15 minutes")
     
