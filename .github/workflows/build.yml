@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [sender, receiver]
+        service: [sender, receiver, archiver]
     
     steps:
       - name: Checkout
