@@ -17,9 +17,21 @@ services:
     build:
       context: ./sender
       dockerfile: ./sender.Dockerfile
-    container_name: backup-sender-minecraft
+    container_name: backup-sender
     volumes:
       - ./sender/config.yml:/config.yml:ro
       - ./test:/watch:ro
     network_mode: host
     restart: unless-stopped
+
+  backup-archiver:
+    build:
+      context: ./archiver
+      dockerfile: ./archiver.Dockerfile
+    container_name: backup-archiver
+    volumes:
+      - ./archiver/config.yml:/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./watch:/server:ro
+      - ./backups:/backups
+    # restart: unless-stopped

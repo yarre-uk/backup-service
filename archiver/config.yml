@@ -1,0 +1,30 @@
+# Target container to archive
+container_name: "minecraft-server"
+
+# How often to create archives (in hours)
+interval_hours: 3
+
+# Source directory to archive (inside container or mounted volume)
+source_path: "/server/world"
+
+# Where to output archives (sender will pick them up)
+output_path: "/backups"
+
+# Optional: Command to run in container before archiving
+pre_archive_command: "rcon-cli save-all flush"
+
+# Timeout for pre-archive command (seconds)
+command_timeout: 30
+
+# Archive format: tar.gz, tar, or zip
+archive_format: "tar.gz"
+
+# Compression level: 0 (none) to 9 (maximum)
+# For tar.gz: 6 is default, good balance
+# For zip: 6 is default
+compression_level: 6
+
+# Archive filename pattern
+# Available variables: {container}, {timestamp}
+# timestamp format: YYYYMMDD-HHMMSS
+naming_pattern: "{container}-{timestamp}.tar.gz"
