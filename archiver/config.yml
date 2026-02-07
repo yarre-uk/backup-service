@@ -5,16 +5,10 @@ container_name: "minecraft-server"
 interval_hours: 3
 
 # Source directory to archive (inside container or mounted volume)
-source_path: "/server/world"
+source_path: "/server"
 
 # Where to output archives (sender will pick them up)
 output_path: "/backups"
-
-# Optional: Command to run in container before archiving
-pre_archive_command: "rcon-cli save-all flush"
-
-# Timeout for pre-archive command (seconds)
-command_timeout: 30
 
 # Archive format: tar.gz, tar, or zip
 archive_format: "tar.gz"

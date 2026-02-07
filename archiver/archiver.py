@@ -22,10 +22,6 @@ class Archiver:
         self.archive_format = config.get('archive_format', 'tar.gz')
         self.naming_pattern = config.get('naming_pattern', '{container}-{timestamp}.tar.gz')
         
-        # Pre-archive command settings
-        self.pre_archive_command = config.get('pre_archive_command')
-        self.command_timeout = config.get('command_timeout', 30)
-        
         # Docker client
         try:
             self.docker_client = docker.from_env()
@@ -45,49 +41,7 @@ class Archiver:
         print(f"[Archiver] Format: {self.archive_format}")
         print(f"[Archiver] Compression: {self.compression_level}")
         print(f"[Archiver] Interval: {self.interval_hours} hours")
-        if self.pre_archive_command:
-            print(f"[Archiver] Pre-command: {self.pre_archive_command}")
-    
-    def run_pre_archive_command(self):
-        if not self.pre_archive_command:
-            return True
-        
-        if not self.docker_client:
-            print(f"[Archiver] Skipping pre-archive command (no Docker client)")
-            return True
-        
-        try:
-            print(f"[Archiver] Running pre-archive command in {self.container_name}...")
-            container = self.docker_client.containers.get(self.container_name)
-            
-            result = container.exec_run(
-                self.pre_archive_command,
-                timeout=self.command_timeout
-            )
-            
-            if result.exit_code == 0:
-                print(f"[Archiver] ✓ Pre-archive command completed successfully")
-                if result.output:
-                    output = result.output.decode('utf-8').strip()
-                    if output:
-                        print(f"[Archiver] Command output: {output}")
-                return True
-            else:
-                print(f"[Archiver] ✗ Pre-archive command failed with exit code {result.exit_code}")
-                if result.output:
-                    print(f"[Archiver] Error: {result.output.decode('utf-8')}")
-                return False
-                
-        except docker.errors.NotFound:
-            print(f"[Archiver] ✗ Container '{self.container_name}' not found")
-            return False
-        except docker.errors.APIError as e:
-            print(f"[Archiver] ✗ Docker API error: {e}")
-            return False
-        except Exception as e:
-            print(f"[Archiver] ✗ Error executing pre-archive command: {e}")
-            return False
-    
+ 
     def generate_filename(self):
         timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
         filename = self.naming_pattern.format(
@@ -133,16 +87,6 @@ class Archiver:
         
         print(f"\n[Archiver] === Archive Creation Started at {datetime.now().isoformat()} ===")
         print(f"[Archiver] Output: {filename}")
-        
-        # Run pre-archive command
-        if not self.run_pre_archive_command():
-            print(f"[Archiver] ✗ Pre-archive command failed, skipping archive creation")
-            return False
-        
-        # Wait a bit for command effects to settle
-        if self.pre_archive_command:
-            print(f"[Archiver] Waiting 60 seconds for state to stabilize...")
-            time.sleep(60)
         
         # Create archive
         try:
