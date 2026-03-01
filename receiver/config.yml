@@ -1,8 +1,4 @@
 games:
-  game1:
-    archive_path: "/archive/game1"
-    max_size_gb: 30
-    
-  game2:
-    archive_path: "/archive/game2"
+  game_name:
+    archive_path: "/archive/game_name"
     max_size_gb: 30
