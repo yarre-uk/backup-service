@@ -11,7 +11,6 @@ services:
       - ./receiver/config.yml:/config.yml:ro
       - ./archive:/archive
     user: "1000:1000"
-    restart: unless-stopped
 
   backup-sender:
     build:
@@ -22,7 +21,6 @@ services:
       - ./sender/config.yml:/config.yml:ro
       - ./test:/watch:ro
     network_mode: host
-    restart: unless-stopped
 
   backup-archiver:
     build:
@@ -31,7 +29,6 @@ services:
     container_name: backup-archiver
     volumes:
       - ./archiver/config.yml:/config.yml:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./archiver/include-patterns:/include-patterns:ro
       - ./watch:/server:ro
       - ./backups:/backups
-    # restart: unless-stopped

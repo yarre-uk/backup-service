@@ -1,0 +1,42 @@
+# Include Patterns File
+# Lines starting with # are comments
+# Empty lines are ignored
+
+# Include entire directories (trailing slash)
+# Worlds/
+# Players/
+
+# Include specific files
+# serverconfig.txt
+# banlist.txt
+
+# Include files with wildcards
+# *.wld
+# *.plr
+
+# Include nested paths
+# config/settings.json
+# data/players/*.dat
+
+# Examples for different games:
+
+# Terraria:
+# Worlds/
+# Players/
+# serverconfig.txt
+
+# Minecraft:
+# world/
+# world_nether/
+# world_the_end/
+# server.properties
+# whitelist.json
+# banned-players.json
+# ops.json
+
+# Vintage Story:
+# Saves/
+# ModConfig/
+# serverconfig.json
+
+**/*.asd

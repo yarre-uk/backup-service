@@ -1,5 +1,5 @@
 # Target container to archive
-container_name: "minecraft-server"
+container_name: "game_name"
 
 # How often to create archives (in hours)
 interval_hours: 3
@@ -9,6 +9,10 @@ source_path: "/server"
 
 # Where to output archives (sender will pick them up)
 output_path: "/backups"
+
+# Path to include patterns file (optional)
+# If not specified or file doesn't exist, archives everything
+include_file: "/include-patterns"
 
 # Archive format: tar.gz, tar, or zip
 archive_format: "tar.gz"
