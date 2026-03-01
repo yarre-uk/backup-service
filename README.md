@@ -1,15 +1,28 @@
 # Backup Service
 
-HTTP-based backup system with automatic file transfer from remote servers to a local backup receiver.
+HTTP-based backup system with automatic archiving and file transfer from remote servers to a local backup receiver.
+
+## Used By
+
+- [minecraft-server](https://github.com/yarre-uk/minecraft-server) — Paper Minecraft server with sender integration
+- [terraria-server](https://github.com/yarre-uk/terraria-server) — Terraria server with archiver + sender integration
 
 ## Architecture
 
-- **Sender**: Monitors directory for backup files, sends them via HTTP to receiver
-- **Receiver**: HTTP server that receives and stores backups with size management
+```
+[ Game Server VPS ]                        [ Local Server ]
+  Archiver  →  /backups  →  Sender  ───►  Receiver
+```
+
+- **Archiver**: Creates compressed archives from game server data on a schedule, with selective file inclusion
+- **Sender**: Monitors the archive output directory and uploads new files via HTTP
+- **Receiver**: HTTP server that receives and stores backups with size-based retention
 
 ## Features
 
-- Cron-based scheduling (runs every 15 minutes)
+- Scheduled archiving (configurable interval in hours)
+- Selective file inclusion via glob patterns (supports `**`, `*`, `?`)
+- Cron-based sending (runs every 15 minutes)
 - File stability checking before transfer
 - CSV-based tracking to prevent duplicate sends
 - Automatic retry on failure
@@ -27,6 +40,19 @@ cd backup-service
 ```
 
 ### 2. Configure Services
+
+**Archiver Configuration** (`archiver/config.yml`):
+
+```yaml
+container_name: "terraria"
+interval_hours: 6
+source_path: "/server"
+output_path: "/backups"
+archive_format: "tar.gz"
+compression_level: 6
+naming_pattern: "{container}-{timestamp}.tar.gz"
+include_file: "/include-patterns"
+```
 
 **Receiver Configuration** (`receiver/config.yml`):
 
@@ -80,6 +106,63 @@ docker logs -f backup-sender-minecraft
 ```
 
 ## Configuration Details
+
+### Archiver
+
+- **container_name**: Used in the output archive filename
+- **interval_hours**: How often to create an archive
+- **source_path**: Root directory to archive (mount your game server data here)
+- **output_path**: Where archives are written (mount the sender's watch directory here)
+- **archive_format**: `tar.gz`, `tar`, or `zip`
+- **compression_level**: 1 (fastest) – 9 (smallest), default 6
+- **naming_pattern**: Supports `{container}` and `{timestamp}` placeholders
+- **include_file**: Path to an include patterns file (optional — omit to archive everything)
+
+### Include Patterns
+
+The include patterns file controls which files get archived. If omitted, the entire `source_path` is archived. The format is one pattern per line; lines starting with `#` are comments.
+
+Supported pattern syntax:
+
+| Pattern | Matches |
+|---|---|
+| `Saves/` | Everything inside the `Saves/` directory |
+| `*.cfg` | All `.cfg` files at the root only |
+| `**/*.sav` | All `.sav` files in any subdirectory recursively |
+| `world/level.dat` | A specific file at a specific path |
+| `data/**/*.json` | All `.json` files under `data/` recursively |
+
+**Example — Terraria:**
+```
+# World and player saves
+Saves/
+
+# Server config
+serverconfig.txt
+```
+
+**Example — Minecraft:**
+```
+# World folders
+world/
+world_nether/
+world_the_end/
+
+# Server config files
+server.properties
+whitelist.json
+ops.json
+banned-players.json
+```
+
+**Example — Vintage Story:**
+```
+# Save files only (skip mods, logs, etc.)
+**/*.vcdbs
+**/*.vcdbs-journal
+ModConfig/
+serverconfig.json
+```
 
 ### Receiver
 
