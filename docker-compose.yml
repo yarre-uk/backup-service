@@ -2,7 +2,6 @@ services:
   backup-receiver:
     image: yarreuk/backup-receiver:latest
     container_name: backup-receiver
-    restart: unless-stopped
     command: --config /config.yml --host 0.0.0.0 --port 8080
     ports:
       - "8080:8080"
@@ -10,13 +9,39 @@ services:
       - ./receiver/config.yml:/config.yml:ro
       - ./archive:/archive
     user: "1000:1000"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   backup-sender:
     image: yarreuk/backup-sender:latest
-    container_name: backup-sender-minecraft
-    command: --config /config.yml
+    container_name: backup-sender
     volumes:
       - ./sender/config.yml:/config.yml:ro
-      - ./test:/watch:ro
+      - ./backups:/watch:ro
     network_mode: host
-    restart: unless-stopped
+    depends_on:
+      backup-archiver:
+          condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+
+  backup-archiver:
+    image: yarreuk/backup-archiver:latest
+    container_name: backup-archiver
+    volumes:
+      - ./archiver/config.yml:/config.yml:ro
+      - ./archiver/include-patterns:/include-patterns:ro
+      - ./watch:/server:ro
+      - ./backups:/backups
+    user: "1000:1000"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
