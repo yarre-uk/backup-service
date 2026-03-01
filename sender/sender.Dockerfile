@@ -16,4 +16,7 @@ ENV PYTHONUNBUFFERED=1
 
 USER 1000:1000
 
+HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import os; os.kill(1, 0)" || exit 1
+
 ENTRYPOINT ["python", "sender.py", "--config", "/config.yml"]

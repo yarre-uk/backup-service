@@ -24,20 +24,36 @@ class BackupManager:
     def save_backup(self, game_name: str, file: UploadFile):
         if game_name not in self.games:
             raise ValueError(f"Unknown game: {game_name}")
-        
+
         game_config = self.games[game_name]
         archive_path = game_config['archive_path']
-        
-        # Save file
-        file_path = os.path.join(archive_path, file.filename)
-        
-        print(f"[{game_name}] Receiving: {file.filename}")
-        
+        max_size_gb = game_config['max_size_gb']
+
+        # Pre-flight: reject if already at the size limit
+        if max_size_gb > 0:
+            max_size_bytes = max_size_gb * 1024 * 1024 * 1024
+            current_size = sum(f.stat().st_size for f in Path(archive_path).iterdir() if f.is_file())
+            if current_size >= max_size_bytes:
+                raise ValueError(
+                    f"Storage full for {game_name}: {current_size / (1024**3):.2f}/{max_size_gb} GB"
+                )
+
+        # Sanitize filename — strip any path components to prevent traversal
+        safe_filename = os.path.basename(file.filename or '')
+        if not safe_filename:
+            raise ValueError("Invalid filename")
+        file_path = os.path.join(archive_path, safe_filename)
+        # Belt-and-suspenders: verify resolved path stays inside archive_path
+        if not os.path.realpath(file_path).startswith(os.path.realpath(archive_path) + os.sep):
+            raise ValueError("Invalid filename")
+
+        print(f"[{game_name}] Receiving: {safe_filename}")
+
         with open(file_path, 'wb') as f:
             shutil.copyfileobj(file.file, f)
         
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
-        print(f"[{game_name}] ✓ Saved: {file.filename} ({file_size_mb:.2f} MB)")
+        print(f"[{game_name}] ✓ Saved: {safe_filename} ({file_size_mb:.2f} MB)")
         
         # Check and enforce size limit
         self.enforce_size_limit(game_name)
@@ -134,21 +150,22 @@ async def receive_backup(
 ):
     try:
         file_path = manager.save_backup(game_name, file)
-        
+        saved_name = Path(file_path).name
+
         return JSONResponse(
             status_code=200,
             content={
                 "status": "success",
-                "message": f"Backup received: {file.filename}",
+                "message": f"Backup received: {saved_name}",
                 "game_name": game_name,
-                "filename": file.filename
+                "filename": saved_name
             }
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to save backup: {str(e)}")
+        print(f"[receiver] Error saving backup for {game_name}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save backup")
 
 
 @app.get("/stats")
@@ -157,7 +174,8 @@ async def get_stats(game_name: str = None):
         stats = manager.get_stats(game_name)
         return JSONResponse(status_code=200, content=stats)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[receiver] Error getting stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve stats")
 
 
 @app.get("/health")

@@ -11,6 +11,12 @@ services:
       - ./receiver/config.yml:/config.yml:ro
       - ./archive:/archive
     user: "1000:1000"
+    pids_limit: 50
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   backup-sender:
     build:
@@ -21,6 +27,15 @@ services:
       - ./sender/config.yml:/config.yml:ro
       - ./test:/watch:ro
     network_mode: host
+    depends_on:
+      backup-archiver:
+          condition: service_healthy
+    pids_limit: 50
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
 
   backup-archiver:
     build:
@@ -32,3 +47,10 @@ services:
       - ./archiver/include-patterns:/include-patterns:ro
       - ./watch:/server:ro
       - ./backups:/backups
+    user: "1000:1000"
+    pids_limit: 50
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M

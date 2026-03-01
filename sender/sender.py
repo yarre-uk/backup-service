@@ -104,27 +104,27 @@ class BackupSender:
                 print(f"[{self.game_name}] ✗ File disappeared during stability check")
                 return False
 
+            if time.time() - start_time > timeout:
+                print(f"[{self.game_name}] ✗ Timeout waiting for file stability")
+                return False
+
             try:
                 current_size = os.path.getsize(filepath)
             except OSError as e:
                 print(f"[{self.game_name}] Error reading file size: {e}")
                 time.sleep(2)
                 continue
-            
+
             if current_size == previous_size:
                 stable_count += 1
                 if stable_count >= 3:  # 3 consecutive checks with same size (6 seconds)
                     print(f"[{self.game_name}] ✓ File stable ({current_size / (1024*1024):.2f} MB)")
-                return True
+                    return True
             else:
                 stable_count = 0
 
             previous_size = current_size
             time.sleep(2)
-        
-            if time.time() - start_time > timeout:
-                print(f"[{self.game_name}] ✗ Timeout waiting for file stability")
-                return False
 
     def send_backup(self, filename):
         filepath = os.path.join(watch_dir, filename)
